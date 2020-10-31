@@ -114,11 +114,15 @@ export class CellDrawer {
 }
 
 export class CellGenerator {
-	static list = {
+	static basic = {
 		water: WaterCell,
 		fire: FireCell,
 		air: AirCell,
-		earth: EarthCell,
+		earth: EarthCell
+	}
+
+	static list = {
+		...CellGenerator.basic,
 		close: CloseCell,
 		transform: TransformCell
 	}

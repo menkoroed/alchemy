@@ -40,13 +40,17 @@ export class Field {
 		for (let k = 1; k < 6; k += 2) {
 			for (let i = 0; i < 2; i++) {
 				for (let j = 0; j < 4; j++) {
-					const type = j ? 'close': Object.keys(CellGenerator.list)[k - i - 1];
 					const x = sidebar.x + sidebar.gap + sidebar.cellWidth*k + sidebar.cellWidth * i;
 					const y = sidebar.y + sidebar.gap + sidebar.cellHeight * 2 * j + sidebar.cellHeight * i;
-					cells.push(generator.create(x, y, type));
+					cells.push(generator.create(x, y, 'close'));
 				}
 			}
 		}
+
+		Object.keys(CellGenerator.basic).forEach((cell, i) => {
+			const { x, y } = cells[i];
+			cells[i] = generator.create(x, y, cell);
+		})
 
 		return cells;
 	}
@@ -70,5 +74,16 @@ export class FieldDrawer {
 
 		ctx.fillStyle = '#f0b727';
 		ctx.fillRect(0, 0, sidebar.x - sidebar.border, sidebar.height);
+
+		const transforms = [];
+
+		for (let i = 0; i < 2; i++) {
+			const x = this.field.width / 2 - sidebar.cellWidth*2 + i*(sidebar.cellWidth*2 + sidebar.gap);
+			const y = this.field.height / 2;
+			transforms.push(generator.create(x, y, 'transform'));
+		}
+
+		const transform = new CellDrawer(transforms);
+		transform.canvas(ctx);
 	}
 }
