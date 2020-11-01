@@ -10,16 +10,27 @@ class Sidebar {
 		this.height = height;
 
 		this.color = '#fae7b5';
-		this.borderColor = '#000';
 
 		this.x = x;
 		this.y = 0;
 
 		this.gap = 40;
-		this.border = 5;
 
 		this.cellWidth = 30;
 		this.cellHeight = 50;
+	}
+}
+
+class SidebarDrawer {
+	constructor (sidebars) {
+		this.sidebars = sidebars;
+	}
+	
+	canvas (ctx) {
+		this.sidebars.forEach(sidebar => {
+			ctx.fillStyle = sidebar.color;
+			ctx.fillRect(sidebar.x, sidebar.y, sidebar.width, sidebar.height);
+		})
 	}
 }
 
@@ -28,14 +39,23 @@ export class Field {
 		this.width = width;
 		this.height = height;
 
-		this.sidebar = new Sidebar(this.width - sidebarWidth, this.height);
-
-		this.cells = this.getCells();
+		this.cells = this._getCells();
 	}
 
-	getCells () {
+	get sidebars () {
+		const sidebars = [];
+
+		for (let i = 0; i < 2; i++) {
+			const x = 0 + (this.width - sidebarWidth) * i;
+			sidebars.push(new Sidebar(x, this.height));
+		}
+
+		return sidebars;
+	}
+
+	_getCells () {
 		const cells = [];
-		const sidebar = this.sidebar;
+		const sidebar = this.sidebars[1];
 
 		for (let k = 1; k < 6; k += 2) {
 			for (let i = 0; i < 2; i++) {
@@ -62,24 +82,22 @@ export class FieldDrawer {
 	}
 
 	canvas (ctx) {
-		const sidebar = this.field.sidebar;
-
-		ctx.fillStyle = sidebar.borderColor;
-		ctx.fillRect(sidebar.x - sidebar.border, sidebar.y, sidebar.border, sidebar.height);
-		ctx.fillStyle = sidebar.color;
-		ctx.fillRect(sidebar.x, sidebar.y, sidebar.width, sidebar.height);
-
-		const drawer = new CellDrawer(this.field.cells);
-		drawer.canvas(ctx);
-
 		ctx.fillStyle = '#f0b727';
-		ctx.fillRect(0, 0, sidebar.x - sidebar.border, sidebar.height);
+		ctx.fillRect(0, 0, this.field.width, this.field.height);
+
+		const sidebarDrawer = new SidebarDrawer(this.field.sidebars);
+		const cellDrawer = new CellDrawer(this.field.cells);
+
+		sidebarDrawer.canvas(ctx);
+		cellDrawer.canvas(ctx);
+
 
 		const transforms = [];
+		const sidebar = this.field.sidebars[0];
 
 		for (let i = 0; i < 2; i++) {
 			const x = this.field.width / 2 - sidebar.cellWidth*2 + i*(sidebar.cellWidth*2 + sidebar.gap);
-			const y = this.field.height / 2;
+			const y = this.field.height / 4;
 			transforms.push(generator.create(x, y, 'transform'));
 		}
 
